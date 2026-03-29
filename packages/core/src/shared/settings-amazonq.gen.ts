@@ -37,7 +37,9 @@ export const amazonqSettings = {
     "amazonQ.workspaceIndexIgnoreFilePatterns": {},
     "amazonQ.ignoredSecurityIssues": {},
     "amazonQ.proxy.certificateAuthority": {},
-    "amazonQ.proxy.enableProxyAndCertificateAutoDiscovery": {}
+    "amazonQ.proxy.enableProxyAndCertificateAutoDiscovery": {},
+    "amazonQ.openAICompatServer.port": {},
+    "amazonQ.openAICompatServer.autoStart": {}
 }
 
 export default amazonqSettings

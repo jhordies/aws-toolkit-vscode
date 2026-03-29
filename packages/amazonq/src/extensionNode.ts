@@ -25,6 +25,7 @@ import { DevOptions } from 'aws-core-vscode/dev'
 import { Auth, AuthUtils, getTelemetryMetadataForConn, isAnySsoConnection } from 'aws-core-vscode/auth'
 import api from './api'
 import { activate as activateCWChat } from './app/chat/activation'
+import { activateOpenAIServer } from './openaiServer'
 import { beta } from 'aws-core-vscode/dev'
 import { activate as activateNotifications, NotificationsController } from 'aws-core-vscode/notifications'
 import { AuthState, AuthUtil } from 'aws-core-vscode/codewhisperer'
@@ -34,6 +35,7 @@ import { activateAgents } from './app/chat/node/activateAgents'
 export async function activate(context: vscode.ExtensionContext) {
     // IMPORTANT: No other code should be added to this function. Place it in one of the following 2 functions where appropriate.
     await activateAmazonQCommon(context, false)
+    activateOpenAIServer(context)
     await activateAmazonQNode(context)
 
     return api
@@ -52,7 +54,7 @@ async function activateAmazonQNode(context: vscode.ExtensionContext) {
         extensionContext: context,
     }
 
-    if (!Experiments.instance.get('amazonqChatLSP', true)) {
+    if (!Experiments.instance.get('amazonqChatLSP', false)) {
         const appInitContext = DefaultAmazonQAppInitContext.instance
         const provider = new AmazonQChatViewProvider(
             context,

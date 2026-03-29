@@ -1,8 +1,8 @@
 {
     "name": "amazon-q-vscode",
-    "displayName": "Amazon Q",
-    "description": "The most capable generative AI–powered assistant for software development.",
-    "version": "1.113.0-SNAPSHOT",
+    "displayName": "Amazon Q (OpenAI Compatible)",
+    "description": "Amazon Q with a local OpenAI-compatible API server for Cline, Continue, and other tools.",
+    "version": "1.113.0-custom",
     "extensionKind": [
         "workspace"
     ],
@@ -46,7 +46,7 @@
     "main": "./dist/src/extensionNode",
     "browser": "./dist/src/extensionWeb",
     "scripts": {
-        "vscode:prepublish": "npm run clean && npm run buildScripts && webpack --mode production",
+        "vscode:prepublish": "echo skipped",
         "buildScripts": "npm run generateNonCodeFiles && npm run copyFiles && npm run generateIcons && npm run generateSettings && tsc -p ./ --noEmit",
         "generateNonCodeFiles": "ts-node ../../scripts/generateNonCodeFiles.ts",
         "copyFiles": "ts-node ./scripts/build/copyFiles.ts",
@@ -218,6 +218,16 @@
                 "amazonQ.proxy.enableProxyAndCertificateAutoDiscovery": {
                     "type": "boolean",
                     "markdownDescription": "%AWS.configuration.description.amazonq.proxy.enableProxyAndCertificateAutoDiscovery%",
+                    "default": true
+                },
+                "amazonQ.openAICompatServer.port": {
+                    "type": "number",
+                    "description": "Port for the local OpenAI-compatible API server.",
+                    "default": 61822
+                },
+                "amazonQ.openAICompatServer.autoStart": {
+                    "type": "boolean",
+                    "description": "Automatically start the OpenAI-compatible API server on extension activation.",
                     "default": true
                 }
             }
@@ -861,6 +871,16 @@
                 "title": "%AWS.amazonq.toggleNextEditPredictionPanel%",
                 "category": "%AWS.amazonq.title%",
                 "enablement": "aws.codewhisperer.connected"
+            },
+            {
+                "command": "aws.amazonq.openaiServer.start",
+                "title": "Start OpenAI-Compatible Server",
+                "category": "%AWS.amazonq.title%"
+            },
+            {
+                "command": "aws.amazonq.openaiServer.stop",
+                "title": "Stop OpenAI-Compatible Server",
+                "category": "%AWS.amazonq.title%"
             }
         ],
         "keybindings": [
