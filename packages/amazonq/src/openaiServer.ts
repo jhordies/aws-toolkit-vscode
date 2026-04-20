@@ -84,7 +84,10 @@ function trimMessages(messages: OpenAIMessage[], model: string, convState?: Conv
     let used = [...systemMsgs, ...extraSystem].reduce((n, m) => n + extractText(m.content).length, 0)
     const kept: OpenAIMessage[] = []
 
-    // Walk newest → oldest, keep as many as fit
+    // Walk newest → oldest, keep as many as fit.
+    // Use a hard budget cutoff: once we can't fit a message, stop — older messages
+    // are less useful and keeping non-contiguous history breaks the alternating
+    // role invariant that Amazon Q's API requires.
     for (let i = nonSystem.length - 1; i >= 0; i--) {
         const len = extractText(nonSystem[i].content).length
         if (used + len > budgetChars) {
@@ -93,6 +96,19 @@ function trimMessages(messages: OpenAIMessage[], model: string, convState?: Conv
         }
         kept.unshift(nonSystem[i])
         used += len
+    }
+
+    // Ensure the kept slice starts with a 'user' message.
+    // Trimming can leave an orphaned 'tool' result or 'assistant' message at the
+    // front (its paired assistant tool_call was dropped), which Amazon Q rejects.
+    while (kept.length && kept[0].role !== 'user') {
+        log.debug('openaiServer: dropping leading %s message to restore user-first invariant', kept[0].role)
+        kept.shift()
+    }
+    // Also drop any leading 'tool' messages (role==='tool') — they must follow an assistant tool_call
+    while (kept.length && kept[0].role === 'tool') {
+        log.debug('openaiServer: dropping leading tool-result message (no preceding tool_call)')
+        kept.shift()
     }
 
     const dropped = nonSystem.length - kept.length
