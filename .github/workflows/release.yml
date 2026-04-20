@@ -54,14 +54,18 @@ jobs:
               run: |
                   echo "FEAT_NAME=" >> $GITHUB_ENV
                   echo "TAG_NAME=prerelease" >> $GITHUB_ENV
-            - run: npm ci
+            - run: npm ci --ignore-scripts
+            - name: Build src.gen packages
+              run: |
+                  cd src.gen/@amzn/codewhisperer-streaming && npm i && cd -
+                  cd src.gen/@amzn/amazon-q-developer-streaming-client && npm i && cd -
+            - name: Build amazonq webpack bundle
+              run: |
+                  node_modules/.bin/webpack --config packages/amazonq/webpack.node.config.js --context packages/amazonq
             - name: vsix
               run: |
-                  npm run createRelease -w packages/toolkit -w packages/amazonq  # Generate CHANGELOG.md
-                  npm run -w packages/sagemaker-ssh-kiro package  # Must be built before toolkit (toolkit embeds it)
-                  npm run -w packages/toolkit package -- --feature "$FEAT_NAME"
+                  npm run createRelease -w packages/amazonq  # Generate CHANGELOG.md
                   npm run -w packages/amazonq package -- --feature "$FEAT_NAME"
-                  rm -f sagemaker-ssh-kiro-*.vsix  # Remove standalone VSIX; it's already embedded inside toolkit VSIX
             - uses: actions/upload-artifact@v4
               with:
                   name: artifacts
